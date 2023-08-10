@@ -4,11 +4,12 @@ import usersRouter from "@/routers/users.routes";
 import errorMiddleware from "@middlewares/error.middleware";
 import { connectDB } from "./config/db";
 import bodyParser from "body-parser";
+import "dotenv/config";
 
 //connect db
 connectDB();
 
-const port = 3000;
+const port = process.env.PORT;
 
 // App Configuration
 const app = express();
