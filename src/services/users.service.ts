@@ -7,18 +7,11 @@ class UsersService {
   public users = userModel;
 
   public getUsers = async (): Promise<User[]> => {
-    try {
-      const users: User[] = await this.users.find();
-      return users;
-    } catch (e) {
-      throw new Error(e);
-    }
+    const users: User[] = await this.users.find();
+    return users;
   };
 
   public getUserById = async (id: string): Promise<User> => {
-    if (id === null) {
-      throw new HttpException(400, "user id is empty");
-    }
     try {
       const findUser: User = await this.users.findOne({ _id: id });
       if (!findUser) throw new HttpException(409, "User doesn't exist");
@@ -30,30 +23,20 @@ class UsersService {
   };
 
   public createUser = async (data: User): Promise<User> => {
-    if (data === null) {
-      throw new HttpException(400, "user data is empty");
+    const checkUser: User = await this.users.findOne({
+      email: data.email,
+    });
+    if (checkUser) {
+      throw new HttpException(409, `this email ${data.email} alredy exists`);
     }
-    try {
-      const checkUser: User = await this.users.findOne({
-        email: data.email,
-      });
-      if (checkUser) {
-        throw new HttpException(409, `this email ${data.email} alredy exists`);
-      }
-      const createUser: User = await this.users.create(data);
-      return createUser;
-    } catch (e) {
-      throw new Error(e);
-    }
+    const createUser: User = await this.users.create(data);
+    return createUser;
   };
 
   public updateUser = async (
     id: string,
     data: CreateUserDto
   ): Promise<User> => {
-    if (id && data === null) {
-      throw new HttpException(400, "user data is empty");
-    }
     const updateUserById: User = await this.users.findByIdAndUpdate(id, data, {
       new: true,
     });

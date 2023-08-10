@@ -26,32 +26,26 @@ class UsersController {
   };
 
   public createUser = async (req: Request, res: Response) => {
-    if (req.body.json) {
-      return res.status(404).json({
-        Message: "Body is empty please insert some data",
-      });
-    }
-    const data = new CreateUserDto();
-    data.address = req.body.address;
-    data.email = req.body.email;
-    data.gstNumber = req.body.gstNumber;
-    data.name = req.body.name;
-    data.phoneNumber = req.body.phoneNumber;
-    const errors = await validate(data);
-    if (errors.length > 0) {
-      const constraints = {};
-      errors.forEach((error) => {
-        const propertyName = error.property;
-        const errorConstraints = Object.values(error.constraints);
-        constraints[propertyName] = errorConstraints;
-      });
-      return res.status(400).json({ constraints });
-    }
     try {
-      const createUserData = await this.usersService.createUser(data);
+      const data = new CreateUserDto();
+      data.address = req.body.address;
+      data.email = req.body.email;
+      data.gstNumber = req.body.gstNumber;
+      data.name = req.body.name;
+      data.phoneNumber = req.body.phoneNumber;
+
+      const errors = await validate(data);
+      if (errors.length > 0) {
+        const constraints = errors.reduce((acc, error) => {
+          acc[error.property] = Object.values(error.constraints);
+          return acc;
+        }, {});
+        return res.status(400).json({ constraints });
+      }
+      const createUserData: User = await this.usersService.createUser(data);
       res.status(201).json({ data: createUserData });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      res.status(409).json({ error: e.message });
     }
   };
 
